@@ -1,44 +1,44 @@
 /** WHATSAPP UTILS */
 
-interface actor_list {
+export interface actor_list {
   male: string[];
   female: string[];
   others: string[];
 }
 
-interface number_message_tuple {
+export interface number_message_tuple {
   num: string;
   msg: string;
 }
 
-interface movie_year_data {
+export interface movie_year_data {
   movie_name: string;
   release_year: string;
 }
 
-interface movie_actor_data {
-  actor: actor_list;
+export interface movie_actor_data {
+  actors: actor_list;
   movie_name: string;
 }
 
-interface movie_genre_data {
+export interface movie_genre_data {
   movie_name: string;
   genre: string[];
 }
 
-interface movie_information {
+export interface movie_information {
   title: string;
   genre: string[];
   release: string;
   rating: number;
 }
 
-interface movie_plot_data {
+export interface movie_plot_data {
   title: string;
   plot: string;
 }
 
-interface whatsapp_payload {
+export interface whatsapp_payload {
   method: string;
   url: string;
   headers: { Authorization: string; "Content-Type": string };
@@ -47,18 +47,49 @@ interface whatsapp_payload {
 
 /** ENTITY INTENT TUPLE OR SMTH */
 
-interface entity_intent_tuple {
-  entities: {
-    genre: string[]; // can make it any later
-    actor: actor_list;
-    daterange: string[];
-    moviename: string[];
-  };
+export interface raw_entities {
+  genre: string[];
+  actor: string[];
+  daterange: string;
+  moviename: string;
+}
+
+export interface entities {
+  genre: string[]; // can make it any later
+  actor: string[];
+  daterange: any[];
+  moviename: string[];
+}
+
+export interface entity_intent_tuple {
+  entities: raw_entities;
   intents: string;
   score: number;
 }
 
-interface movie_response_wrapper {
-  movie_info: any;
-  message_body: string;
+export interface movie_response_wrapper {
+  movie_info: any | null;
+  message_body: string | null;
+}
+
+/**KEYS */
+interface IObjectKeys {
+  [key: string]: string | number;
+}
+
+/**IMDB */
+
+export interface genre_mapping {
+  [key: string | number]: number | string;
+}
+
+export type actor_ID_mapping = Map<string, number | null>;
+export type genre_ID_mapping = Map<string, string | number | null>;
+
+export interface IMDB_queries {
+  actor_ID_mapping: actor_ID_mapping | null;
+  genre_ID_mapping: genre_ID_mapping | null;
+  actor_string: string;
+  genre_string: string;
+  year: any;
 }
