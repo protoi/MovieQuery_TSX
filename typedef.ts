@@ -50,14 +50,14 @@ export interface whatsapp_payload {
 export interface raw_entities {
   genre: string[];
   actor: string[];
-  daterange: string[];
-  moviename: string[];
+  daterange: string;
+  moviename: string;
 }
 
 export interface entities {
   genre: string[]; // can make it any later
-  actor: actor_list;
-  daterange: string[];
+  actor: string[];
+  daterange: any[];
   moviename: string[];
 }
 
@@ -68,8 +68,26 @@ export interface entity_intent_tuple {
 }
 
 export interface movie_response_wrapper {
-  movie_info: any;
-  message_body: string;
+  movie_info: any | null;
+  message_body: string | null;
+}
+
+
+/**IMDB */
+
+export interface genre_mapping {
+  [key: string | number]: number | string;
+}
+
+export type actor_ID_mapping = Map<string, number | null>;
+export type genre_ID_mapping = Map<string, string | number | null>;
+
+export interface IMDB_queries {
+  actor_ID_mapping: actor_ID_mapping | null;
+  genre_ID_mapping: genre_ID_mapping | null;
+  actor_string: string;
+  genre_string: string;
+  year: any;
 }
 
 /**KEYS */
