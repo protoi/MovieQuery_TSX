@@ -72,10 +72,6 @@ export interface movie_response_wrapper {
   message_body: string | null;
 }
 
-/**KEYS */
-interface IObjectKeys {
-  [key: string]: string | number;
-}
 
 /**IMDB */
 
@@ -92,4 +88,9 @@ export interface IMDB_queries {
   actor_string: string;
   genre_string: string;
   year: any;
+}
+
+/**KEYS */
+interface IObjectKeys {
+  [key: string]: string | number;
 }
