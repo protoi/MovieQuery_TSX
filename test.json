@@ -1,0 +1,24 @@
+[
+  {
+    "_id": "Category 2",
+    "monthlyRevenue": [
+      { "month": 1, "revenue": 50.0 },
+      { "month": 3, "revenue": 48.0 }
+    ],
+    "totalRevenue": 98.0
+  },
+  {
+    "_id": "Category 1",
+    "monthlyRevenue": [
+      {
+        "month": 1,
+        "revenue": 50.0
+      },
+      {
+        "month": 2,
+        "revenue": 45.0
+      }
+    ],
+    "totalRevenue": 95.0
+  }
+]
