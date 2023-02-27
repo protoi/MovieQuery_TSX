@@ -6,7 +6,6 @@ const express = require("express");
 const { default_router } = require("./Routes/default.routes");
 const { movie_router } = require("./Routes/movie.routes");
 const { onboarding_router } = require("./Routes/onboarding.routes");
-const { frequency_router } = require("./Routes/frequency.routes");
 const { query_router } = require("./Routes/query.routes");
 
 const PORT: number = 9999;
@@ -32,7 +31,7 @@ exp.use(cors());
 
 exp.use("/", default_router);
 exp.use("/", movie_router);
-exp.use("/", frequency_router);
+// exp.use("/", frequency_router);
 exp.use("/", query_router);
 exp.use("/", onboarding_router);
 

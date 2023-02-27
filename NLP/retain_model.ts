@@ -1,7 +1,7 @@
 const fs = require("fs");
 const { NlpManager } = require("node-nlp");
 const path = require("path");
-import { raw_entities, entity_intent_tuple } from "../typedef";
+import { raw_entities, entity_intent_tuple, entities } from "../typedef";
 /**
  * Creates a NLP class
  * @class

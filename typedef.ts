@@ -50,15 +50,15 @@ export interface whatsapp_payload {
 export interface raw_entities {
   genre: string[];
   actor: string[];
-  daterange: string;
-  moviename: string;
+  daterange: string[];
+  moviename: string[];
 }
 
 export interface entities {
   genre: string[]; // can make it any later
   actor: string[];
-  daterange: any[];
-  moviename: string[];
+  daterange: any;
+  moviename: string;
 }
 
 export interface entity_intent_tuple {
