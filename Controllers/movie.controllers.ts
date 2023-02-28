@@ -1,5 +1,5 @@
 const axios = require("axios");
-const { Request, Response} = require ("express");
+const { Request, Response } = require("express");
 const { logger } = require("../logger");
 //our classes
 const nlp_model = require("../NLP/retain_model");
@@ -8,7 +8,7 @@ const IMDB = require("../IMDB");
 const Query = require("../model");
 const default_messages = require("./default_intent_example.json");
 
-import {entity_intent_tuple} from "../typedef"
+import { entity_intent_tuple } from "../typedef";
 
 //Objects
 const WhatsappUtilsObj = new WhatsappUtils.WhatsappUtils();
@@ -16,6 +16,8 @@ const IMDBObj = new IMDB.IMDB();
 const model = new nlp_model.NLP();
 
 let mongo_payload: any = {};
+
+let error_flag: boolean = false;
 
 require("dotenv").config();
 
@@ -69,7 +71,8 @@ const fetch_info_and_post_to_whatsapp = async (req: any, res: any) => {
       `Intent extraced : ${EntityIntent_tuple.intents} with probability: ${EntityIntent_tuple.score}`
     );
 
-    if (EntityIntent_tuple.score < model.SCORE_THRESHOLD) {
+    /* if (EntityIntent_tuple.score < model.SCORE_THRESHOLD) {
+      error_flag = true;
       const payload = WhatsappUtilsObj.generate_payload(
         num,
         "I donot understand, please try another message."
@@ -86,8 +89,7 @@ const fetch_info_and_post_to_whatsapp = async (req: any, res: any) => {
         );
         res.sendStatus(403);
       }
-      return;
-    }
+    } */
   } catch (err: any) {
     EntityIntent_tuple = null;
     console.error(`entity and intent extraction failed: ${err.message}`);
@@ -98,7 +100,10 @@ const fetch_info_and_post_to_whatsapp = async (req: any, res: any) => {
 
   if (EntityIntent_tuple != null) {
     try {
-      if (EntityIntent_tuple.intents === "message.greetings")
+      if (EntityIntent_tuple.score < model.SCORE_THRESHOLD) {
+        error_flag = true;
+        message_body = "I donot understand, please try another message.";
+      } else if (EntityIntent_tuple.intents === "message.greetings") {
         message_body = `Greetings!
 If you have any questions about movies, feel free to ask me as I am the Movie Bot with extensive knowledge from TMDB.
 Here are a few examples of what you can ask:
@@ -109,7 +114,7 @@ Here are a few examples of what you can ask:
 - Tell me the cast of 'Jaws'
 - What are the genres of 'Spirited Away'
 If you need help just type "hello"`;
-      else if (
+      } else if (
         EntityIntent_tuple.entities.genre.length == 0 &&
         EntityIntent_tuple.entities.actor.length == 0 &&
         EntityIntent_tuple.entities.daterange.length == 0 &&
@@ -118,6 +123,7 @@ If you need help just type "hello"`;
         message_body = "Please try something like this:";
         let identified_intent = EntityIntent_tuple.intents;
         message_body += " " + default_messages[identified_intent];
+        error_flag = true;
       } else {
         ({ movie_info, message_body, entity_valuelist } =
           await IMDBObj.get_movie_query_from_intents(EntityIntent_tuple));
@@ -133,7 +139,10 @@ If you need help just type "hello"`;
   mongo_payload.Response_Body = message_body;
   mongo_payload.Entity_valuelist = entity_valuelist;
 
-  if (message_body == null) message_body = "oh no, something went wrong";
+  if (message_body == null) {
+    message_body = "oh no, something went wrong";
+    error_flag = true;
+  }
   mongo_payload.Time_Stamp = Date();
   console.log(mongo_payload);
 
@@ -141,6 +150,11 @@ If you need help just type "hello"`;
   console.log(payload);
 
   const success = await WhatsappUtilsObj.send_message_to_whatsapp(payload);
+
+  if (error_flag == true) {
+    error_flag = false;
+    mongo_payload.EntityIntent_tuple.intents = "message.error";
+  }
 
   const query = new Query(mongo_payload);
   //res.sendStatus(200);
@@ -170,4 +184,4 @@ module.exports = {
   model,
 };
 
-export { };
+export {};

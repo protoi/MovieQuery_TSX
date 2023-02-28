@@ -156,7 +156,7 @@ const group_queries_by_date_week = async (request: any, response: any) => {
     logger.error("Could not fetch data");
   }
   try {
-    query = mongoUtilsObject.restructure_query(query);
+    //query = mongoUtilsObject.restructure_query(query);
     response.send(query);
   } catch (error) {
     response.status(500).send(error);
