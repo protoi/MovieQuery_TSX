@@ -2,7 +2,7 @@
  * @module API_source
  */
 
-import { ClientRequest, ServerResponse } from "http";
+import { ClientRequest, request, ServerResponse } from "http";
 import { Http2ServerRequest, Http2ServerResponse } from "http2";
 
 const { Request, Response } = require("express");
@@ -277,6 +277,79 @@ const get_movie_frequencies = async (request: any, response: any) => {
   }
 };
 
+const group_documents_yearly_monthly_and_daily = async (request: any, response: any) => {
+  let query = null;
+  let start_year = new Date("2023-01-01T00:00:00Z");
+  let end_year = new Date("2024-01-01T00:00:00Z");
+  try {
+    query = await Query.aggregate([
+      // Group by year, month, and day
+      {
+        $group: {
+          _id: {
+            year: { $year: "$Time_Stamp" },
+            month: { $month: "$Time_Stamp" },
+            day: { $dayOfMonth: "$Time_Stamp" },
+          },
+          documents: { $push: "$$ROOT" },
+        },
+      },
+      // Group by year and month, and add a day field containing arrays of the documents for each day
+      {
+        $group: {
+          _id: {
+            year: "$_id.year",
+            month: "$_id.month",
+          },
+          days: {
+            $push: {
+              day: "$_id.day",
+              documents: "$documents",
+            },
+          },
+        },
+      },
+      // Project the output to show year, month, and day arrays for each day
+      {
+        $project: {
+          _id: 0,
+          year: "$_id.year",
+          month: {
+            $switch: {
+              branches: [
+                { case: { $eq: ["$_id.month", 1] }, then: "January" },
+                { case: { $eq: ["$_id.month", 2] }, then: "February" },
+                { case: { $eq: ["$_id.month", 3] }, then: "March" },
+                { case: { $eq: ["$_id.month", 4] }, then: "April" },
+                { case: { $eq: ["$_id.month", 5] }, then: "May" },
+                { case: { $eq: ["$_id.month", 6] }, then: "June" },
+                { case: { $eq: ["$_id.month", 7] }, then: "July" },
+                { case: { $eq: ["$_id.month", 8] }, then: "August" },
+                { case: { $eq: ["$_id.month", 9] }, then: "September" },
+                { case: { $eq: ["$_id.month", 10] }, then: "October" },
+                { case: { $eq: ["$_id.month", 11] }, then: "November" },
+                { case: { $eq: ["$_id.month", 12] }, then: "December" },
+              ],
+            },
+          },
+          days: 1,
+        },
+      },
+    ]);
+  } catch (error: any) {
+    logger.error(error.message)
+  }
+
+
+
+
+  try {
+    response.send(query);
+  } catch (error) {
+    response.status(500).send(error);
+  }
+}
+
 //Exporting the required functions
 module.exports = {
   get_document_on_the_basis_of_intents,
@@ -285,6 +358,7 @@ module.exports = {
   group_documents_by_intent,
   get_actor_frequencies,
   get_movie_frequencies,
+  group_documents_yearly_monthly_and_daily,
 };
 
 export { };
