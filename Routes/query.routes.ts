@@ -118,12 +118,11 @@ query_router.get(
   query_controllers.get_movie_frequencies
 );
 
-
-
-query_router.get("/query/group_documents_yearly_monthly_and_daily",
-query_controllers.group_documents_yearly_monthly_and_daily);
+query_router.get(
+  "/query/group_documents_yearly_monthly_and_daily",
+  query_controllers.group_documents_yearly_monthly_and_daily
+);
 
 module.exports = { query_router };
 
-
-export { };
+export {};

@@ -24,7 +24,10 @@ const mongoUtilsObject = new MongoUtils();
  * @param {Request} request HTTP Request object
  * @param {Response} response HTTP Response object
  */
-const get_document_on_the_basis_of_intents = async (request: any, response: any) => {
+const get_document_on_the_basis_of_intents = async (
+  request: any,
+  response: any
+) => {
   let query = null;
   let intent: string = request.query.intent;
   try {
@@ -172,6 +175,23 @@ const group_queries_by_date_week = async (request: any, response: any) => {
  */
 const get_genre_frequencies = async (request: any, response: any) => {
   let query = null;
+  if (request.param.genre !== null) {
+    try {
+      query = await Query.find({
+        /* "EntityIntent_tuple": {
+          "intents": "message.get_actor",
+        }, */
+
+        "EntityIntent_tuple.entities.genre": request.param.genre,
+      });
+    } catch (err: any) {
+      logger.error("Could not fetch data");
+      response.send(err.message);
+      return;
+    }
+    response.status(200).send(query);
+    return;
+  }
   try {
     query = await Query.find(
       { "EntityIntent_tuple.entities.genre": { $ne: [] } },
@@ -277,7 +297,10 @@ const get_movie_frequencies = async (request: any, response: any) => {
   }
 };
 
-const group_documents_yearly_monthly_and_daily = async (request: any, response: any) => {
+const group_documents_yearly_monthly_and_daily = async (
+  request: any,
+  response: any
+) => {
   let query = null;
   let start_year = new Date("2023-01-01T00:00:00Z");
   let end_year = new Date("2024-01-01T00:00:00Z");
@@ -337,18 +360,15 @@ const group_documents_yearly_monthly_and_daily = async (request: any, response: 
       },
     ]);
   } catch (error: any) {
-    logger.error(error.message)
+    logger.error(error.message);
   }
-
-
-
 
   try {
     response.send(query);
   } catch (error) {
     response.status(500).send(error);
   }
-}
+};
 
 //Exporting the required functions
 module.exports = {
@@ -361,4 +381,4 @@ module.exports = {
   group_documents_yearly_monthly_and_daily,
 };
 
-export { };
+export {};

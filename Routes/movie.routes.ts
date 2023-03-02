@@ -14,4 +14,4 @@ movie_router.post(
 
 module.exports = { movie_router };
 
-export { };
+export {};
