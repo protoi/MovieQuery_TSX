@@ -7,7 +7,7 @@ export interface actor_list {
 }
 
 export interface number_message_tuple {
-  num: string;
+  num: any;
   msg: string;
 }
 
@@ -71,7 +71,6 @@ export interface movie_response_wrapper {
   movie_info: any | null;
   message_body: string | null;
 }
-
 
 /**IMDB */
 
