@@ -1,0 +1,6 @@
+{
+  "entryPoints": ["./"],
+  "out": "docs",
+  "exclude": ["./node_modules/"],
+  // "entryPointStrategy": "expand"
+}

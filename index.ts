@@ -11,7 +11,6 @@ const { query_router } = require("./Routes/query.routes");
 const PORT: number = 9999;
 const exp: any = express();
 
-
 exp.use(express.json());
 exp.use(
   express.urlencoded({
@@ -25,7 +24,6 @@ mongoose.set("strictQuery", false);
 mongoose.connect(
   `mongodb+srv://${process.env.MONGO_DB_USERNAME}:${process.env.MONGO_DB_PASSWORD}@${process.env.MONGO_DB_CLUSTER_INFORMATION}.mongodb.net/${process.env.DATABASE_NAME}?retryWrites=true&w=majority`
 );
-
 
 exp.use(cors());
 
