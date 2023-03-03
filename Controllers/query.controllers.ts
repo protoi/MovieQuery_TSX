@@ -1,11 +1,11 @@
 /**
  * @module API_source
  */
-
 import { ClientRequest, request, ServerResponse } from "http";
 import { Http2ServerRequest, Http2ServerResponse } from "http2";
 
 const { Request, Response } = require("express");
+const restructurer = require("./restructure_query");
 const express = require("express");
 let exp = express();
 const { Logger } = require("winston");
@@ -77,9 +77,65 @@ const group_documents_by_intent = async (request: any, response: any) => {
   }
 };
 
-//This function takes a date in yyyy-mm-dd format
-//Then it gets the starting date and ending date of the week in which the input date lies
-//Then it groups document on the basis of the dates of the week
+/**
+ * returns any message matching the provided key to be filtered
+ * @param request
+ * @param response
+ * @returns
+ */
+const get_breakdown = async (request: any, response: any) => {
+  let query = null;
+  const query_mapping: any = {
+    genre: true,
+    actor: true,
+    moviename: true,
+    plot: true,
+  };
+  if (
+    request.query.key !== undefined &&
+    request.query.value !== undefined &&
+    query_mapping[request.query.key] !== undefined
+  ) {
+    try {
+      switch (request.query.key) {
+        case "genre":
+          query = await Query.find({
+            "EntityIntent_tuple.entities.genre": { $in: [request.query.value] },
+          });
+          break;
+        case "actor":
+          query = await Query.find({
+            "EntityIntent_tuple.entities.actor": { $in: [request.query.value] },
+          });
+          break;
+        case "moviename":
+          query = await Query.find({
+            "EntityIntent_tuple.entities.moviename": {
+              $in: [request.query.value],
+            },
+          });
+          break;
+        case "plot":
+          query = await Query.find({
+            "EntityIntent_tuple.intents": "message.get_plot",
+          });
+          break;
+
+        default:
+          query = [];
+          break;
+      }
+    } catch (err: any) {
+      logger.error("Could not fetch data");
+      response.status(500).send(err.message);
+      return;
+    }
+    response.status(200).send(query);
+    return;
+  }
+
+  response.status(500).send(null);
+};
 
 /**
  * Extracts the date formatted as YYYY/MM/DD and returns the weeks queries cumulatively grouped with respect to time (week, day, hour)
@@ -175,23 +231,7 @@ const group_queries_by_date_week = async (request: any, response: any) => {
  */
 const get_genre_frequencies = async (request: any, response: any) => {
   let query = null;
-  if (request.param.genre !== null) {
-    try {
-      query = await Query.find({
-        /* "EntityIntent_tuple": {
-          "intents": "message.get_actor",
-        }, */
 
-        "EntityIntent_tuple.entities.genre": request.param.genre,
-      });
-    } catch (err: any) {
-      logger.error("Could not fetch data");
-      response.send(err.message);
-      return;
-    }
-    response.status(200).send(query);
-    return;
-  }
   try {
     query = await Query.find(
       { "EntityIntent_tuple.entities.genre": { $ne: [] } },
@@ -230,6 +270,7 @@ const get_genre_frequencies = async (request: any, response: any) => {
  */
 const get_actor_frequencies = async (request: any, response: any) => {
   let query = null;
+
   try {
     query = await Query.find(
       { "EntityIntent_tuple.entities.actor": { $ne: [] } },
@@ -268,6 +309,7 @@ const get_actor_frequencies = async (request: any, response: any) => {
  */
 const get_movie_frequencies = async (request: any, response: any) => {
   let query = null;
+
   try {
     query = await Query.find(
       { "EntityIntent_tuple.entities.moviename": { $ne: [] } },
@@ -297,6 +339,13 @@ const get_movie_frequencies = async (request: any, response: any) => {
   }
 };
 
+/**
+ * Fetches the non-zero frequencies of all genres that have been queried
+ * @function
+ * @memberof module:API_source
+ * @param {Request} request HTTP Response Object
+ * @param {Response} response HTTP Response Object
+ */
 const group_documents_yearly_monthly_and_daily = async (
   request: any,
   response: any
@@ -364,7 +413,9 @@ const group_documents_yearly_monthly_and_daily = async (
   }
 
   try {
-    response.send(query);
+    // console.log((query));
+    // response.send(query);
+    response.send(restructurer.restructure_mongo_response(query));
   } catch (error) {
     response.status(500).send(error);
   }
@@ -379,6 +430,7 @@ module.exports = {
   get_actor_frequencies,
   get_movie_frequencies,
   group_documents_yearly_monthly_and_daily,
+  get_breakdown,
 };
 
 export {};

@@ -123,6 +123,7 @@ query_router.get(
   query_controllers.group_documents_yearly_monthly_and_daily
 );
 
+query_router.get("/query/get_breakdown", query_controllers.get_breakdown);
 module.exports = { query_router };
 
 export {};
