@@ -118,9 +118,30 @@ query_router.get(
   query_controllers.get_movie_frequencies
 );
 
+/**
+ * <b>Functionality</b>: returns yearly data
+ *
+ * <b>Type</b>: GET
+ *
+ * <b>Example: </b> /query/get_movie_frequencies
+ * @name /query/group_documents_yearly_monthly_and_daily
+ */
 query_router.get(
   "/query/group_documents_yearly_monthly_and_daily",
   query_controllers.group_documents_yearly_monthly_and_daily
+);
+
+/**
+ * <b>Functionality</b>: returns frequencies of release years queries
+ *
+ * <b>Type</b>: GET
+ *
+ * <b>Example: </b> /query/get_release_year_frequencies
+ * @name /query/get_release_year_frequencies
+ */
+query_router.get(
+  "/query/get_release_year_frequencies",
+  query_controllers.get_release_year_frequencies
 );
 
 query_router.get("/query/get_breakdown", query_controllers.get_breakdown);
