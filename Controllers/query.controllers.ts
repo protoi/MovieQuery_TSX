@@ -90,6 +90,9 @@ const get_breakdown = async (request: any, response: any) => {
     actor: true,
     moviename: true,
     plot: true,
+    release_year: true,
+    error: true,
+    greetings: true,
   };
   if (
     request.query.key !== undefined &&
@@ -115,12 +118,28 @@ const get_breakdown = async (request: any, response: any) => {
             },
           });
           break;
+        case "release_year":
+          query = await Query.find({
+            "EntityIntent_tuple.entities.daterange": {
+              $in: [request.query.value],
+            },
+          });
+          break;
         case "plot":
           query = await Query.find({
             "EntityIntent_tuple.intents": "message.get_plot",
           });
           break;
-
+        case "error":
+          query = await Query.find({
+            "EntityIntent_tuple.intents": "message.error",
+          });
+          break;
+        case "greetings":
+          query = await Query.find({
+            "EntityIntent_tuple.intents": "message.greetings",
+          });
+          break;
         default:
           query = [];
           break;
@@ -340,6 +359,45 @@ const get_movie_frequencies = async (request: any, response: any) => {
 };
 
 /**
+ * Fetches the non-zero frequencies of all years that have been queried
+ * @function
+ * @memberof module:API_source
+ * @param {Request} request HTTP Response Object
+ * @param {Response} response HTTP Response Object
+ */
+const get_release_year_frequencies = async (request: any, response: any) => {
+  let query = null;
+
+  try {
+    query = await Query.find(
+      { "EntityIntent_tuple.entities.daterange": { $ne: [] } },
+      {
+        "EntityIntent_tuple.entities.daterange": 1,
+        _id: 0,
+      }
+    );
+  } catch (err: any) {
+    logger.error("Could not fetch data");
+    response.send(err.message);
+    return;
+  }
+  let freq_map: any = new Map();
+  query.forEach((element: any) => {
+    let moviename = element["EntityIntent_tuple"]["entities"]["daterange"];
+    moviename.forEach((element: any) => {
+      if (freq_map[element] == null) freq_map[element] = 1;
+      freq_map[element]++;
+    });
+  });
+
+  try {
+    response.send(freq_map);
+  } catch (error) {
+    response.status(500).send(error);
+  }
+};
+
+/**
  * Fetches the non-zero frequencies of all genres that have been queried
  * @function
  * @memberof module:API_source
@@ -431,6 +489,7 @@ module.exports = {
   get_movie_frequencies,
   group_documents_yearly_monthly_and_daily,
   get_breakdown,
+  get_release_year_frequencies,
 };
 
 export {};
